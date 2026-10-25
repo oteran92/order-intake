@@ -6,13 +6,13 @@ order-intake reads those orders, checks them against your master data and prepar
 
 ## Status
 
-v0.1, early. Extraction and validation work. The review screen and ERP export are next.
+v0.1, early. The full path from email to export works: extraction, validation, review and export. Connectors to a specific ERP or mailbox are not part of this repository.
 
 | Step | State |
 |---|---|
 | Extraction (email with PDF, Excel or CSV attachments) | working, text-based PDFs only |
 | Validation against master data | working |
-| Review and approval screen | working, with inline corrections |
+| Review screen (approve, reject, inline corrections) | working |
 | Export (generic JSON/CSV) | working |
 
 ## What the validator catches
@@ -45,7 +45,14 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/order-intake review data/extracted --inbox samples/inbox --catalog samples/catalog
 ```
 
-The review screen shows the original email, PDF or Excel next to the extracted lines, marks every exception and saves approved orders to `data/approved/`. Header fields and lines can be corrected inline: each correction is written back to the extracted order with the old and new value, and the order is validated again. Orders with errors cannot be approved; warnings must be confirmed. It listens on localhost only and has no login.
+The review screen shows the original email, PDF or Excel next to the extracted lines and marks every exception. Header fields and lines can be corrected inline: each correction is written back to the extracted order with the old and new value, and the order is validated again.
+
+Each order ends with one decision, and both are final:
+
+- **Approve:** saved to `data/approved/` for export. Orders with errors cannot be approved; warnings must be confirmed.
+- **Reject:** saved to `data/rejected/` with an optional reason, the corrections and the open issues, so the decision can be traced. Orders with errors can be rejected.
+
+It listens on localhost only and has no login.
 
 Extraction copies values exactly as written. Matching, unit conversion and every correction happen in validation, where the rules are visible and testable. Requests are sent with `store=False`. Scanned PDFs without a text layer are skipped for now.
 
