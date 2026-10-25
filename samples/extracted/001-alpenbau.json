@@ -1,0 +1,34 @@
+{
+  "source_file": "001-alpenbau.eml",
+  "sender": "einkauf@alpenbau.example",
+  "po_number": "AB-2026-0815",
+  "order_date": "2026-10-20",
+  "delivery_date": null,
+  "ship_to": "Alpenbau Installationen GmbH, Werkstrasse 4, 6300 Zug",
+  "lines": [
+    {
+      "line_no": 1,
+      "customer_ref": "AB-4711",
+      "description": "Schraube M6x20",
+      "quantity": 500,
+      "unit": "Stk",
+      "unit_price": 0.12
+    },
+    {
+      "line_no": 2,
+      "customer_ref": "AB-4712",
+      "description": "Schraube M8x30",
+      "quantity": 200,
+      "unit": "Stück",
+      "unit_price": 0.18
+    },
+    {
+      "line_no": 3,
+      "customer_ref": "AB-5020",
+      "description": "Dübel 8mm",
+      "quantity": 3,
+      "unit": "Karton",
+      "unit_price": 9.5
+    }
+  ]
+}

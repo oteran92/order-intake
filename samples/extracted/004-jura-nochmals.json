@@ -1,0 +1,34 @@
+{
+  "source_file": "004-jura-nochmals.eml",
+  "sender": "m.beispiel@jura-haustechnik.example",
+  "po_number": "JH-4501",
+  "order_date": "2026-10-22",
+  "delivery_date": "2026-11-10",
+  "ship_to": null,
+  "lines": [
+    {
+      "line_no": 1,
+      "customer_ref": "JH-KABEL-5",
+      "description": null,
+      "quantity": 2,
+      "unit": "Rolle",
+      "unit_price": 115.0
+    },
+    {
+      "line_no": 2,
+      "customer_ref": "DOSE-AP-1",
+      "description": null,
+      "quantity": 25,
+      "unit": "Stk",
+      "unit_price": 4.2
+    },
+    {
+      "line_no": 3,
+      "customer_ref": "7610000000011",
+      "description": null,
+      "quantity": 400,
+      "unit": "Stk",
+      "unit_price": 0.12
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Order review{% endblock %}</title>
+  <style>
+    :root { --ink: #111C32; --muted: #5B6478; --line: #DDE1E8; --bg: #F6F6F2; --blue: #2457FF;
+            --error: #B42318; --error-bg: #FDECEA; --warning: #8A5A00; --warning-bg: #FFF4DB;
+            --ok: #1E7A46; --ok-bg: #E7F5EC; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.45 "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: var(--bg); }
+    header.top { padding: 14px 24px; border-bottom: 1px solid var(--line); background: #fff; }
+    header.top a { color: var(--ink); text-decoration: none; font-weight: 700; }
+    main { padding: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 12px; }
+    h3 { font-size: 13px; margin: 16px 0 6px; color: var(--muted); }
+    .muted { color: var(--muted); }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 12px; color: var(--muted); font-weight: 600; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+    .badge.ready, .badge.approved { background: var(--ok-bg); color: var(--ok); }
+    .badge.needs_review { background: var(--warning-bg); color: var(--warning); }
+    .badge.rejected { background: var(--error-bg); color: var(--error); }
+    tr.error { background: var(--error-bg); } tr.warning { background: var(--warning-bg); }
+    .issue { font-size: 12px; margin: 2px 0; }
+    .issue.error { color: var(--error); } .issue.warning { color: var(--warning); } .issue.info { color: var(--muted); }
+    a { color: var(--blue); }
+    button { font: inherit; padding: 8px 18px; border: 0; border-radius: 6px; background: var(--blue); color: #fff;
+             font-weight: 600; cursor: pointer; }
+    button:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <header class="top"><a href="/">order-intake · review</a></header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

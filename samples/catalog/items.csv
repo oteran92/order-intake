@@ -1,0 +1,10 @@
+item_no,description,base_unit,ean,active
+SCH-M6X20-VZ,Sechskantschraube M6x20 verzinkt,PCE,7610000000011,true
+SCH-M8X30-VZ,Sechskantschraube M8x30 verzinkt,PCE,7610000000028,true
+DUE-8-NY,Nylondübel 8 mm,PCE,7610000000035,true
+KAB-3X1.5-GR,Kabel 3x1.5 mm² grau,MTR,7610000000042,true
+KAB-3X1.5-SW,Kabel 3x1.5 mm² schwarz,MTR,7610000000059,true
+KAB-5X2.5-GR,Kabel 5x2.5 mm² grau,MTR,7610000000066,true
+ROHR-M20,Installationsrohr M20,MTR,7610000000073,true
+DOSE-AP-1,Abzweigdose Aufputz,PCE,7610000000080,true
+SCH-M6X20-AL,Sechskantschraube M6x20 Aluminium (ausgelaufen),PCE,7610000000097,false

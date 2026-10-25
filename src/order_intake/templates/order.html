@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ item.order.source_file }} · Order review{% endblock %}
+{% block content %}
+<style>
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 20px; align-items: start; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+  pre { white-space: pre-wrap; font: 12px/1.5 Menlo, Consolas, monospace; margin: 0; background: var(--bg);
+        padding: 12px; border-radius: 6px; }
+  iframe { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: 6px; }
+  .sheet td { font: 12px Menlo, Consolas, monospace; border: 1px solid var(--line); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0 0 16px; }
+  dt { color: var(--muted); } dd { margin: 0; }
+  .approve { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .notice { margin-bottom: 16px; }
+  .nowrap { white-space: nowrap; }
+  .reject-form { display: flex; gap: 8px; align-items: end; margin-top: 16px; }
+  .reject-form label { display: grid; gap: 2px; flex: 1; font-size: 12px; color: var(--muted); }
+  .reject-form input { font: inherit; padding: 7px 8px; border: 1px solid var(--line); border-radius: 4px; }
+  button.secondary { background: #fff; color: var(--error); border: 1px solid var(--error); }
+  .notice.error-notice { border-color: var(--error); color: var(--error); }
+  details.edit summary { cursor: pointer; color: var(--blue); font-size: 12px; margin-top: 4px; }
+  details.edit summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .edit-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;
+               margin: 8px 0; padding: 10px; background: var(--bg); border-radius: 6px; }
+  .edit-form label { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+  .edit-form input { font: inherit; padding: 5px 7px; border: 1px solid var(--line); border-radius: 4px;
+                     color: var(--ink); background: #fff; min-width: 0; }
+  .edit-form .wide { grid-column: 1 / -1; }
+  .edit-form button { justify-self: start; padding: 6px 14px; }
+  .history { margin-top: 20px; font-size: 12px; }
+  .history td { padding: 4px 6px; }
+</style>
+
+<h1>{{ item.order.source_file }}</h1>
+<p class="muted">
+  {% if decision %}<span class="badge {{ decision }}">{{ decision }}</span>
+  {% else %}<span class="badge {{ item.result.status }}">{{ item.result.status | replace("_", " ") }}</span>{% endif %}
+</p>
+{% if notice == "approved" %}<p class="panel notice" role="status">Approved and saved for ERP export.</p>
+{% elif notice == "rejected" %}<p class="panel notice" role="status">Rejected. The order and its corrections are kept for traceability.</p>
+{% elif notice == "saved" %}<p class="panel notice" role="status">Correction saved. The order was validated again.</p>
+{% elif notice == "unchanged" %}<p class="panel notice" role="status">Nothing changed.</p>{% endif %}
+{% if error %}<p class="panel notice error-notice" role="alert">Not saved: {{ error }}</p>{% endif %}
+
+<div class="layout">
+  <section class="panel" aria-label="Original document">
+    <h2>Original document</h2>
+    {% for part in parts %}
+      <h3>{{ part.title }}</h3>
+      {% if part.kind == "pdf" %}
+        <iframe src="/orders/{{ item.stem }}/parts/{{ loop.index0 }}" title="{{ part.title }}"></iframe>
+      {% elif part.kind == "table" %}
+        <table class="sheet">{% for row in part.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}</table>
+      {% else %}
+        <pre>{{ part.text }}</pre>
+      {% endif %}
+    {% else %}
+      <p class="muted">Source file {{ item.order.source_file }} not found in the inbox.</p>
+    {% endfor %}
+  </section>
+
+  <section class="panel" aria-label="Extracted order">
+    <h2>Extracted order</h2>
+    <dl>
+      <dt>Sender</dt><dd>{{ item.order.sender }}</dd>
+      <dt>Customer</dt><dd>{{ item.result.customer_id or "unknown" }}</dd>
+      <dt>PO number</dt><dd>{{ item.order.po_number or "–" }}</dd>
+      <dt>Order date</dt><dd>{{ item.order.order_date or "–" }}</dd>
+      <dt>Delivery date</dt><dd>{{ item.order.delivery_date or "–" }}</dd>
+      <dt>Ship to</dt><dd>{{ item.order.ship_to or "–" }}</dd>
+    </dl>
+    {% if not decision %}
+    <details class="edit"{% if header_issues | selectattr("code", "equalto", "MISSING_FIELD") | list %} open{% endif %}>
+      <summary>Edit header</summary>
+      <form class="edit-form" method="post" action="/orders/{{ item.stem }}/header">
+        <label>PO number<input name="po_number" value="{{ item.order.po_number or '' }}"></label>
+        <label>Order date<input type="date" name="order_date" value="{{ item.order.order_date or '' }}"></label>
+        <label>Delivery date<input type="date" name="delivery_date" value="{{ item.order.delivery_date or '' }}"></label>
+        <label class="wide">Ship to<input name="ship_to" value="{{ item.order.ship_to or '' }}"></label>
+        <button type="submit">Save header</button>
+      </form>
+    </details>
+    {% endif %}
+    {% for issue in header_issues %}
+      <p class="issue {{ issue.severity.value }}"><strong>{{ issue.code }}</strong> {{ issue.message }}</p>
+    {% endfor %}
+
+    <table>
+      <thead><tr>
+        <th>#</th><th>As ordered</th><th class="num">Qty</th><th>Unit</th><th class="num">Price</th>
+        <th>Item</th><th class="num">Base qty</th>
+      </tr></thead>
+      <tbody>
+      {% for raw, validated in lines %}
+        {% set issues = line_issues.get(raw.line_no, []) %}
+        {% set severities = issues | map(attribute="severity.value") | list %}
+        <tr class="{{ 'error' if 'error' in severities else 'warning' if 'warning' in severities else '' }}">
+          <td>{{ raw.line_no }}</td>
+          <td>{{ raw.customer_ref }}{% if raw.description %}<br><span class="muted">{{ raw.description }}</span>{% endif %}
+            {% for issue in issues %}
+              <p class="issue {{ issue.severity.value }}"><strong>{{ issue.code }}</strong> {{ issue.message }}
+              {% if issue.candidates %}({{ issue.candidates | join(", ") }}){% endif %}</p>
+            {% endfor %}
+            {% if not decision %}
+            {% set candidates = issues | map(attribute="candidates") | sum(start=[]) %}
+            <details class="edit">
+              <summary>Edit line {{ raw.line_no }}</summary>
+              <form class="edit-form" method="post" action="/orders/{{ item.stem }}/lines/{{ raw.line_no }}">
+                <label class="wide">Reference
+                  <input name="customer_ref" value="{{ raw.customer_ref }}"{% if candidates %} list="cand-{{ raw.line_no }}"{% endif %}>
+                </label>
+                {% if candidates %}<datalist id="cand-{{ raw.line_no }}">{% for c in candidates %}<option value="{{ c }}">{% endfor %}</datalist>{% endif %}
+                <label class="wide">Description<input name="description" value="{{ raw.description or '' }}"></label>
+                <label>Quantity<input name="quantity" inputmode="decimal" required value="{{ '%g' | format(raw.quantity) }}"></label>
+                <label>Unit<input name="unit" value="{{ raw.unit or '' }}"></label>
+                <label>Price<input name="unit_price" inputmode="decimal" value="{{ '%.2f' | format(raw.unit_price) if raw.unit_price is not none else '' }}"></label>
+                <button type="submit">Save line</button>
+              </form>
+            </details>
+            {% endif %}
+          </td>
+          <td class="num">{{ "%g" | format(raw.quantity) }}</td>
+          <td>{{ raw.unit or "–" }}</td>
+          <td class="num">{{ "%.2f" | format(raw.unit_price) if raw.unit_price is not none else "–" }}</td>
+          <td class="nowrap">{{ validated.item_no or "–" }}</td>
+          <td class="num nowrap">{% if validated.quantity is not none %}{{ "%g" | format(validated.quantity) }} {{ validated.unit }}{% else %}–{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="approve">
+    {% if decision == "approved" %}
+      <p>This order is approved.
+        Export: <a href="/orders/{{ item.stem }}/export.json">JSON</a> · <a href="/orders/{{ item.stem }}/export.csv">CSV</a></p>
+    {% elif decision == "rejected" %}
+      <p>This order is rejected{% if rejection_reason %}: {{ rejection_reason }}{% endif %}. It can no longer be edited.</p>
+    {% else %}
+      <form method="post" action="/orders/{{ item.stem }}/approve">
+        {% if has_errors %}
+          <p class="issue error">Resolve the errors above before approving. Use "Edit line" or "Edit header" to correct them.</p>
+          <button type="submit" disabled>Approve order</button>
+        {% else %}
+          {% if has_warnings %}
+            <p><label><input type="checkbox" name="confirm_warnings" value="1" required> I checked the warnings above</label></p>
+          {% endif %}
+          <button type="submit">Approve order</button>
+        {% endif %}
+      </form>
+      <form class="reject-form" method="post" action="/orders/{{ item.stem }}/reject">
+        <label>Reason (optional)<input name="reason" maxlength="500" placeholder="e.g. duplicate of JH-4501, asked customer to resend"></label>
+        <button type="submit" class="secondary">Reject order</button>
+      </form>
+    {% endif %}
+    </div>
+
+    {% if item.order.corrections %}
+    <section class="history" aria-label="Corrections">
+      <h3>Corrections ({{ item.order.corrections | length }})</h3>
+      <table>
+        <thead><tr><th>Line</th><th>Field</th><th>Was</th><th>Now</th><th>When (UTC)</th></tr></thead>
+        <tbody>
+        {% for c in item.order.corrections | reverse %}
+          <tr><td>{{ c.line_no or "header" }}</td><td>{{ c.field }}</td><td>{{ c.old if c.old is not none else "–" }}</td>
+              <td>{{ c.new if c.new is not none else "–" }}</td><td class="nowrap">{{ c.at.strftime("%Y-%m-%d %H:%M") }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{
+  "source_file": "005-neukunde.eml",
+  "sender": "info@neu-kunde.example",
+  "po_number": "N-1",
+  "order_date": "2026-10-23",
+  "delivery_date": null,
+  "ship_to": null,
+  "lines": [
+    {
+      "line_no": 1,
+      "customer_ref": "SCH-M6X20-AL",
+      "description": null,
+      "quantity": 100,
+      "unit": "Stk",
+      "unit_price": 0.15
+    }
+  ]
+}

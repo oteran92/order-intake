@@ -1,0 +1,42 @@
+{
+  "source_file": "002-seetal.eml",
+  "sender": "einkauf@seetal-elektro.example",
+  "po_number": "SE-77120",
+  "order_date": "2026-10-21",
+  "delivery_date": null,
+  "ship_to": "Baustelle Hochdorf, Bahnhofstrasse 12, 6280 Hochdorf",
+  "lines": [
+    {
+      "line_no": 1,
+      "customer_ref": "KAB-3x1.5",
+      "description": "Kabel 3x1.5",
+      "quantity": 2,
+      "unit": "Rollen",
+      "unit_price": 89.0
+    },
+    {
+      "line_no": 2,
+      "customer_ref": "KAB-5X2.5-GR",
+      "description": "Kabel 5x2.5 grau",
+      "quantity": 150,
+      "unit": "m",
+      "unit_price": 3.4
+    },
+    {
+      "line_no": 3,
+      "customer_ref": "ROHR-M20",
+      "description": "Rohr M20",
+      "quantity": 3,
+      "unit": "Rolle",
+      "unit_price": 45.0
+    },
+    {
+      "line_no": 4,
+      "customer_ref": "WAGO 221-413",
+      "description": "Verbindungsklemme",
+      "quantity": 50,
+      "unit": "Stk.",
+      "unit_price": 0.55
+    }
+  ]
+}

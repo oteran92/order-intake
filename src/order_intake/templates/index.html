@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel">
+  <h1>Incoming orders</h1>
+  <p class="muted">{{ rows | length }} orders, in arrival order.</p>
+  <table>
+    <thead><tr><th>Source</th><th>Customer</th><th>PO</th><th>Lines</th><th>Issues</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for item, decision in rows %}
+      <tr>
+        <td><a href="/orders/{{ item.stem }}">{{ item.order.source_file }}</a></td>
+        <td>{{ item.result.customer_id or "unknown" }}</td>
+        <td>{{ item.order.po_number or "–" }}</td>
+        <td class="num">{{ item.order.lines | length }}</td>
+        <td class="num">{{ item.result.issues | rejectattr("severity.value", "equalto", "info") | list | length }}</td>
+        <td>
+          {% if decision %}<span class="badge {{ decision }}">{{ decision }}</span>
+          {% else %}<span class="badge {{ item.result.status }}">{{ item.result.status | replace("_", " ") }}</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

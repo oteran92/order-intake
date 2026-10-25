@@ -1,0 +1,4 @@
+customer_id,name,email_domain,required_fields
+C100,Alpenbau Installationen GmbH,alpenbau.example,po_number
+C200,Seetal Elektro AG,seetal-elektro.example,po_number|ship_to
+C300,Jura Haustechnik AG,jura-haustechnik.example,po_number|delivery_date
